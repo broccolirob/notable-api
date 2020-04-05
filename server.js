@@ -18,7 +18,7 @@ console.log("Mail Server: " + config.get("mail.host"));
 console.log("Mail Password: " + config.get("mail.password"));
 
 mongoose
-  .connect("mongodb://localhost/notable", {
+  .connect("mongodb://db:27017/notable", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

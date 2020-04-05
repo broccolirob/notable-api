@@ -1,5 +1,5 @@
 {
-  "jwtPrivateKey": "notable_jwtPrivateKey",
+  "jwtPrivateKey": "JWT_KEY",
   "mail": {
     "password": "APP_PASSWORD"
   }

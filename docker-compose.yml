@@ -1,0 +1,50 @@
+version: "2.4"
+
+services:
+  traefik:
+    image: traefik:v2.2
+    command:
+      - --api.insecure=true
+      - --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+  web:
+    image: rschn/notable-client:latest
+    ports:
+      - "3000:80"
+    labels:
+      - "traefik.http.routers.web.rule=Host(`localhost`)"
+      - "traefik.http.services.web.loadbalancer.server.port=80"
+
+  api:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/node/app
+      - /node/app/node_modules
+    depends_on:
+      - db
+    environment:
+      - JWT_KEY=12345
+      - APP_PASSWORD=pss123
+    labels:
+      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
+
+  db:
+    image: mongo:4.2.5
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
