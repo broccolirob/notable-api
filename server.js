@@ -8,17 +8,13 @@ const auth = require("./routes/auth");
 
 const app = express();
 
-if (!config.get("jwtPrivateKey")) {
-  console.error("FATAL ERROR: jwtPrivateKey is not defined in config.");
+if (!config.get("jwt.key") || !config.get("jwt.exp")) {
+  console.error("FATAL ERROR: jwt private key or expiration time not set.");
   process.exit(1);
 }
 
-console.log("Application Name: " + config.get("name"));
-console.log("Mail Server: " + config.get("mail.host"));
-console.log("Mail Password: " + config.get("mail.password"));
-
 mongoose
-  .connect("mongodb://db:27017/notable", {
+  .connect("mongodb://localhost:27017/notable", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -46,7 +42,5 @@ app.use(express.json());
 app.use(helmet());
 
 app.use("/api/auth", auth);
-
-app.get("/", (req, res) => res.send("Hi there!"));
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}...`));

@@ -1,3 +1,3 @@
 {
-  "jwtPrivateKey": ""
+  "jwt": { "key": "12345", "exp": "2 days" }
 }

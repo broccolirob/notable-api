@@ -1,6 +1,6 @@
 {
-  "jwtPrivateKey": "JWT_KEY",
-  "mail": {
-    "password": "APP_PASSWORD"
+  "jwt": {
+    "key": "JWT_KEY",
+    "exp": "JWT_EXP"
   }
 }
