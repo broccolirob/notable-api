@@ -10,10 +10,11 @@ const router = express.Router();
 
 router.post("/user/register", async (req, res) => {
   const { error } = validateUser(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return res.status(400).send({ error: error.details[0].message });
 
   let user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send("User is already registered.");
+  if (user)
+    return res.status(400).send({ error: "User is already registered." });
 
   user = new User(_.pick(req.body, ["username", "email", "password"]));
 
@@ -42,10 +43,28 @@ router.post("/", async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   let user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send("Invalid email or password.");
+  if (!user)
+    return res.status(400).send({
+      error: {
+        message: "Invalid email or password",
+        fields: {
+          mail: "",
+          password: "",
+        },
+      },
+    });
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).send("Invalid email or password.");
+  if (!validPassword)
+    return res.status(400).send({
+      error: {
+        message: "Invalid email or password",
+        fields: {
+          mail: "",
+          password: "",
+        },
+      },
+    });
 
   const token = user.generateAuthToken();
 
@@ -84,9 +103,8 @@ router.post("/access-token", async (req, res) => {
       token: token,
     });
   } catch (err) {
-    console.log(err.message);
     console.error(err);
-    res.status(401).send("Invalid access token detected");
+    res.status(401).send({ error: "Invalid access token detected" });
   }
 });
 

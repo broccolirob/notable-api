@@ -14,7 +14,7 @@ if (!config.get("jwt.key") || !config.get("jwt.exp")) {
 }
 
 mongoose
-  .connect("mongodb://localhost:27017/notable", {
+  .connect("mongodb://db:27017/notable", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
