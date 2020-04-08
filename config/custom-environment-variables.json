@@ -1,6 +1,5 @@
 {
   "jwt": {
-    "key": "JWT_KEY",
-    "exp": "JWT_EXP"
+    "key": "JWT_SECRET"
   }
 }

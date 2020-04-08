@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
@@ -8,7 +9,7 @@ const auth = require("./routes/auth");
 
 const app = express();
 
-if (!config.get("jwt.key") || !config.get("jwt.exp")) {
+if (!config.get("jwt.key")) {
   console.error("FATAL ERROR: jwt private key or expiration time not set.");
   process.exit(1);
 }
