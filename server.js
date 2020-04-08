@@ -5,7 +5,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const config = require("config");
 const dbDebug = require("debug")("app:db");
-const auth = require("./routes/auth");
+const passport = require("passport");
 
 const app = express();
 
@@ -15,7 +15,7 @@ if (!config.get("jwt.key")) {
 }
 
 mongoose
-  .connect("mongodb://db:27017/notable", {
+  .connect("mongodb://localhost:27017/notable", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -41,7 +41,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(helmet());
+app.use(passport.initialize());
+require("./middleware/jwt")(passport);
 
-app.use("/api/auth", auth);
+require("./routes")(app);
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}...`));

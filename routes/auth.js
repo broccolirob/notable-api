@@ -1,125 +1,21 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const config = require("config");
-const _ = require("lodash");
-const Joi = require("@hapi/joi");
-const { User, validateUser } = require("../models/user");
+const Auth = require("../controllers/auth");
+const Password = require("../controllers/password");
 
 const router = express.Router();
 
-router.post("/user/register", async (req, res) => {
-  const { error } = validateUser(req.body);
-  if (error) return res.status(400).send({ error: error.details[0].message });
+router.post("/", Auth.login);
 
-  let user = await User.findOne({ email: req.body.email });
-  if (user)
-    return res.status(400).send({ error: "User is already registered." });
+router.post("/register", Auth.register);
 
-  user = new User(_.pick(req.body, ["username", "email", "password"]));
+router.post("/access-token", Auth.getAccessToken);
 
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password, salt);
+router.get("/verify/:verifyToken", Auth.verify);
 
-  await user.save();
+router.post("/verify/resend", Auth.resendVerifyToken);
 
-  const token = user.generateAuthToken();
+router.post("/recover", Password.recover);
 
-  res.send({
-    user: _.pick(user, [
-      "_id",
-      "username",
-      "email",
-      "role",
-      "photoURL",
-      "emailConfirmed",
-    ]),
-    token: token,
-  });
-});
-
-router.post("/", async (req, res) => {
-  const { error } = validateLogin(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  let user = await User.findOne({ email: req.body.email });
-  if (!user)
-    return res.status(400).send({
-      error: {
-        message: "Invalid email or password",
-        fields: {
-          mail: "",
-          password: "",
-        },
-      },
-    });
-
-  const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword)
-    return res.status(400).send({
-      error: {
-        message: "Invalid email or password",
-        fields: {
-          mail: "",
-          password: "",
-        },
-      },
-    });
-
-  const token = user.generateAuthToken();
-
-  res.send({
-    user: _.pick(user, [
-      "_id",
-      "username",
-      "email",
-      "role",
-      "photoURL",
-      "emailConfirmed",
-    ]),
-    token: token,
-  });
-});
-
-router.post("/access-token", async (req, res) => {
-  const req_token = req.body.token;
-
-  try {
-    const { id } = jwt.verify(req_token, config.get("jwt.key"));
-
-    const user = await User.findById(id);
-
-    const token = user.generateAuthToken();
-
-    res.send({
-      user: _.pick(user, [
-        "_id",
-        "username",
-        "email",
-        "role",
-        "photoURL",
-        "emailConfirmed",
-      ]),
-      token: token,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(401).send({ error: "Invalid access token detected" });
-  }
-});
-
-router.post("/user/update", async (req, res) => {
-  console.log(req.body);
-  return res.status(400).send("Hi! You hit api/auth/user/update");
-});
-
-function validateLogin(req) {
-  const schema = Joi.object({
-    email: Joi.string().min(5).max(255).required().email(),
-    password: Joi.string().min(5).max(255).required(),
-  });
-
-  return schema.validate(req);
-}
+router.post("/reset/:resetToken", Password.resetPassword);
 
 module.exports = router;

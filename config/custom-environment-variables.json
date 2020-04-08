@@ -1,5 +1,9 @@
 {
   "jwt": {
     "key": "JWT_SECRET"
+  },
+  "sendgrid": {
+    "key": "SENDGRID_API_KEY",
+    "from": "FROM_EMAIL"
   }
 }
