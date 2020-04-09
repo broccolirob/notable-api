@@ -1,5 +1,6 @@
 {
   "jwt": { "key": "", "exp": "60 days" },
   "sendgrid": { "key": "", "from": "" },
-  "baseURL": "http://localhost"
+  "baseURL": "http://localhost",
+  "db": { "hostname": "localhost" }
 }

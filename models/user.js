@@ -36,13 +36,14 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ["admin", "staff", "user"],
     },
-    photoURL: {
-      type: String,
-      get: (v) => (v ? `${ROOT}${v}` : ""),
-    },
     emailConfirmed: {
       type: Boolean,
       default: false,
+      required: true,
+    },
+    photoURL: {
+      type: String,
+      get: (v) => (v ? `${ROOT}${v}` : ""),
     },
     resetPasswordToken: {
       type: String,

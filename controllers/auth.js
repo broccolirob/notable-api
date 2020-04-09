@@ -8,6 +8,7 @@ const { sendMail } = require("../utils");
 async function register(req, res) {
   try {
     let user = await User.findOne({ email: req.body.email });
+
     if (user)
       return res.status(400).send({ error: "User is already registered." });
 
@@ -16,15 +17,26 @@ async function register(req, res) {
     const user_ = await user.save();
 
     await sendVerificationEmail(user_, req, res);
+
+    const token = user_.generateAuthToken();
+
+    res.status(200).send({
+      token,
+      user: _.pick(user_, ["_id", "username", "email", "photoURL", "role"]),
+    });
   } catch (err) {
-    console.log(err);
-    res.send({ message: err });
+    res.status(500).send({
+      error: {
+        message: "An error occured in our system. It's not you, it's us.",
+      },
+    });
   }
 }
 
 async function login(req, res) {
   try {
     let user = await User.findOne({ email: req.body.email });
+
     if (!user)
       return res.status(400).send({
         error: { message: "Invalid email or password" },
@@ -35,25 +47,10 @@ async function login(req, res) {
         error: { message: "Invalid email or password" },
       });
 
-    if (!user.emailConfirmed)
-      return res.status(400).json({
-        error: {
-          message:
-            "Account is unverified. Check your email for verification link",
-        },
-      });
-
     const token = user.generateAuthToken();
 
-    res.send({
-      user: _.pick(user, [
-        "_id",
-        "username",
-        "email",
-        "role",
-        "photoURL",
-        "emailConfirmed",
-      ]),
+    res.status(200).send({
+      user: _.pick(user, ["_id", "username", "email", "role", "photoURL"]),
       token: token,
     });
   } catch (err) {
@@ -121,24 +118,17 @@ async function getAccessToken(req, res) {
   try {
     const { id } = jwt.verify(req_token, config.get("jwt.key"));
 
-    const user = await User.findById(id);
+    let user = await User.findById(id);
 
     const token = user.generateAuthToken();
 
-    res.send({
-      user: _.pick(user, [
-        "_id",
-        "username",
-        "email",
-        "role",
-        "photoURL",
-        "emailConfirmed",
-      ]),
-      token: token,
-    });
+    user = _.pick(user, ["_id", "username", "email", "role", "photoURL"]);
+
+    res.status(200).send({ user, token });
   } catch (err) {
-    console.error(err);
-    res.status(401).send({ error: "Invalid access token detected" });
+    res
+      .status(401)
+      .send({ error: { message: "Invalid access token detected" } });
   }
 }
 
@@ -155,12 +145,12 @@ async function sendVerificationEmail(user, req, res) {
     let html = `<p>Welcome ${user.username}</p><br><p>Please click on the following <a href="${link}">link</a> to verify your account.</p>`;
 
     await sendMail({ to, from, subject, html });
-
-    res.send({
-      message: `A verification email has been sent to ${user.email}.`,
-    });
   } catch (err) {
-    res.send({ error: { message: err.message } });
+    res.status(500).send({
+      error: {
+        message: "An error occured in our system. It's not you, it's us.",
+      },
+    });
   }
 }
 

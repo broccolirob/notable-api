@@ -5,5 +5,8 @@
   "sendgrid": {
     "key": "SENDGRID_API_KEY",
     "from": "FROM_EMAIL"
+  },
+  "db": {
+    "hostname": "DB_HOST"
   }
 }

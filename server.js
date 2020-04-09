@@ -15,7 +15,7 @@ if (!config.get("jwt.key")) {
 }
 
 mongoose
-  .connect("mongodb://localhost:27017/notable", {
+  .connect(`mongodb://${config.get("db.hostname")}:27017/notable`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -42,8 +42,8 @@ app.use(cors());
 app.use(express.json());
 app.use(helmet());
 app.use(passport.initialize());
-require("./middleware/jwt")(passport);
 
+require("./middleware/jwt")(passport);
 require("./routes")(app);
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}...`));
