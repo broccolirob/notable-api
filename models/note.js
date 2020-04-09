@@ -2,14 +2,19 @@ const mongoose = require("mongoose");
 
 const noteSchema = new mongoose.Schema(
   {
-    title: { type: String, required: false },
-    description: { type: String, required: false },
+    title: { type: String },
+    description: { type: String },
     archive: { type: Boolean, default: false },
-    image: {},
-    time: { type: Date },
-    reminder: { type: Date, required: false },
-    checklist: {},
-    labels: {},
+    image: { type: String },
+    reminder: { type: Date },
+    checklist: [
+      {
+        id: { type: String, required: true },
+        checked: { type: Boolean, default: false, required: true },
+        text: { type: String, required: true },
+      },
+    ],
+    labels: [{ type: mongoose.Schema.Types.ObjectId, ref: "Label" }],
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

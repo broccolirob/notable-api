@@ -7,6 +7,13 @@ const labelSchema = new mongoose.Schema({
   },
   handle: {
     type: String,
+    lowercase: true,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
   },
 });
 
